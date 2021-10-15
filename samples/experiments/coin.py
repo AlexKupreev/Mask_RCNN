@@ -49,6 +49,8 @@ COCO_WEIGHTS_PATH = os.path.join(ROOT_DIR, "mask_rcnn_coco.h5")
 # through the command line argument --logs
 DEFAULT_LOGS_DIR = os.path.join(ROOT_DIR, "logs")
 
+DEFAULT_NUM_EPOCHS = 5
+
 ############################################################
 #  Configurations
 ############################################################
@@ -187,7 +189,7 @@ class CoinDataset(utils.Dataset):
             super(self.__class__, self).image_reference(image_id)
 
 
-def train(model):
+def train(model, num_epochs: int):
     """Train the model."""
     # Training dataset.
     dataset_train = CoinDataset()
@@ -206,7 +208,7 @@ def train(model):
     print("Training network heads")
     model.train(dataset_train, dataset_val,
                 learning_rate=config.LEARNING_RATE,
-                epochs=10,
+                epochs=num_epochs,
                 layers='heads')
 
 
@@ -311,6 +313,10 @@ if __name__ == '__main__':
     parser.add_argument('--video', required=False,
                         metavar="path or URL to video",
                         help='Video to apply the color splash effect on')
+    parser.add_argument('--num_epochs', required=False,
+                        default=DEFAULT_NUM_EPOCHS,
+                        metavar="number of epochs",
+                        help='Number of epochs to train')
     args = parser.parse_args()
 
     # Validate arguments
@@ -323,6 +329,7 @@ if __name__ == '__main__':
     print("Weights: ", args.weights)
     print("Dataset: ", args.dataset)
     print("Logs: ", args.logs)
+    print("Num epochs to train: ", args.num_epochs)
 
     # Configurations
     if args.command == "train":
@@ -372,7 +379,7 @@ if __name__ == '__main__':
 
     # Train or evaluate
     if args.command == "train":
-        train(model)
+        train(model, args.num_epochs)
     elif args.command == "splash":
         detect_and_color_splash(model, image_path=args.image,
                                 video_path=args.video)
